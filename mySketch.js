@@ -1,5 +1,6 @@
 var set_bd = {};
 var set_pl = {};
+var set_sounds = {};
 var bd = [];
 let bg_color = "#003366";
 
@@ -31,6 +32,12 @@ function game_start() {
       }
     }
   }
+
+  set_sounds = {
+    se_1: loadSound("assets/sounds/se_1.mp3"),
+    se_2: loadSound("assets/sounds/se_2.mp3"),
+    se_3: loadSound("assets/sounds/se_3.mp3"),
+  };
 
   /*set_pl = {
     st_x: set_bd.x / 2,
@@ -73,6 +80,7 @@ function draw() {
   }
   if (frameCount % set_pl.speed == 0) {
     if (
+      !set_pl.now_k ||
       bd[set_pl.now_y + set_pl.dicts[set_pl.now_k][1]][
         set_pl.now_x + set_pl.dicts[set_pl.now_k][0]
       ] != 5
@@ -85,9 +93,14 @@ function draw() {
 
 function keyPressed() {
   //console.log(keyCode);
-  if (keyCode == 68) set_pl.now_k = 1;
-  if (keyCode == 83) set_pl.now_k = 2;
-  if (keyCode == 65) set_pl.now_k = 3;
+  var key_list = [87, 68, 83, 65];
+  if (key_list.indexOf(parseInt(keyCode)) == -1) return false;
+
+  for (k in key_list) {
+    if (parseInt(keyCode) == key_list[k]) set_pl.now_k = parseInt(k);
+  }
+  if (parseInt(keyCode) == key_list[0]) return false;
+  setTimeout(set_sounds.se_2.play(), 1);
 }
 
 function keydownEvent(e) {
@@ -116,10 +129,11 @@ function repaint() {
 }
 
 function player_spawn() {
+  var r_long = [4, 5, 6];
   set_pl = {
     st_x: set_bd.x / 2,
     st_y: 0,
-    long: 5,
+    long: r_long[Math.floor(Math.random() * r_long.length)],
     g_over: false,
     dicts: [
       [0, -1], //上
@@ -132,8 +146,8 @@ function player_spawn() {
     now_d: 1,
     now_k: 1,
     history: [],
-    def_speed: 16,
-    speed: 16,
+    def_speed: 10,
+    speed: 10,
     decided: false,
   };
 
@@ -170,11 +184,15 @@ function player_body() {
 }
 
 function player_move(int_dict) {
-  if (!int_dict) return false;
-  if (bd[set_pl.now_y + set_pl.dicts[int_dict][1]][set_pl.now_x + set_pl.dicts[int_dict][0]]) {
+  int_dict = parseInt(int_dict);
+  if (
+    !int_dict ||
+    bd[set_pl.now_y + set_pl.dicts[int_dict][1]][set_pl.now_x + set_pl.dicts[int_dict][0]]
+  ) {
     set_pl.decided = true;
     set_pl.speed = 1;
     bd[set_pl.history[0][1]][set_pl.history[0][0]] = 5;
+    setTimeout(set_sounds.se_1.play(), 1);
     block_down(set_pl.history);
     return false;
   }
@@ -228,6 +246,7 @@ function get_block_pos(arr) {
 }
 
 function is_line(arr) {
+  var bool = false;
   for (var i in arr) {
     arr[i].pop();
     arr[i].shift();
@@ -236,7 +255,10 @@ function is_line(arr) {
       return sum + element;
     }, 0);
 
-    if (n == (set_bd.x - 2) * 5) line_clear(i);
+    if (n == (set_bd.x - 2) * 5) line_clear(i), (bool = true);
+  }
+  if (bool) {
+    setTimeout(set_sounds.se_3.play(), 1);
   }
 }
 
@@ -248,14 +270,12 @@ function line_clear(l) {
 }
 
 function game_over() {
-  if (frameCount % set_pl.def_speed == 0) {
-    var arr = bd.map(function (value) {
-      var arr_1 = value.map(function (value2) {
-        if (value2) return 6;
-      });
-      return arr_1;
+  var arr = bd.map(function (value) {
+    var arr_1 = value.map(function (value2) {
+      if (value2) return 6;
     });
-  }
+    return arr_1;
+  });
 
   bd = arr.map(function (value) {
     return value.concat();

@@ -79,7 +79,6 @@ function draw() {
     return false;
   }
   if (frameCount % set_pl.speed == 0||set_pl.moved) {
-    if (set_pl.moved) set_pl.moved=false;
     if (
       !set_pl.now_k ||
       bd[set_pl.now_y + set_pl.dicts[set_pl.now_k][1]][
@@ -89,11 +88,13 @@ function draw() {
       set_pl.now_d = set_pl.now_k;
     if (!set_pl.decided) player_move(set_pl.now_d);
     repaint();
+    if (set_pl.moved) set_pl.moved=false;
   }
 }
 
 function keyPressed() {
   //console.log(keyCode);
+  if(set_pl.moved) return false;
   var key_list = [87, 68, 83, 65];
   if (key_list.indexOf(parseInt(keyCode)) == -1) return false;
 

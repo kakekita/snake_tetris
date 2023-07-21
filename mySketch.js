@@ -101,6 +101,7 @@ function keyPressed() {
   }
   if (parseInt(keyCode) == key_list[0]) return false;
   setTimeout(set_sounds.se_2.play(), 1);
+  draw();
 }
 
 function keydownEvent(e) {
